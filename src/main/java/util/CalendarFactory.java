@@ -3,48 +3,37 @@ package util;
 import java.util.Arrays;
 
 public class CalendarFactory {
-    public static void main(String[] args) {
-        String[][] calendarForm = getCalendarForm();
-        fillDate(calendarForm, 28, 4);
-        fillEmpty(calendarForm);
-        System.out.println(buildCalendar(calendarForm));
-    }
-
+    private static String[][] calendar;
     private static final int STANDARD_DATE = 1;
 
     public static String createCalendar(int maxDate, int defaultDate){
-        String[][] calendarForm = getCalendarForm();
-        fillDate(calendarForm, maxDate, defaultDate);
-        fillEmpty(calendarForm);
-        return buildCalendar(calendarForm);
+        setCalendar(getCalendarForm());
+        fillDate(maxDate, defaultDate);
+        fillEmpty();
+        return buildCalendarMessage(getCalendar());
     }
 
-    private static String buildCalendar(String[][] calendar){
-        StringBuilder builder = new StringBuilder();
-
-        builder.append(Format.TOP.getFormat())
-               .append(Format.LINE.getFormat());
-
-        for(String[] week : calendar){
-            builder.append(String.format(Format.DATE.getFormat(), week));
-        }
-
-        return builder.toString();
+    private static void setCalendar(String[][] calendarForm){
+        calendar = calendarForm;
     }
 
+    private static String[][] getCalendar(){
+        return calendar;
+    }
 
     private static String[][] getCalendarForm(){
         return new String[5][7];
     }
 
 
-    private static void fillDate(String[][] calendarForm, int maxDate, int defaultDate){
+    private static void fillDate(int maxDate, int defaultDate){
         for(int date=1; date<=maxDate; date++){
+            String[][] calendar = getCalendar();
             int row = getWeekIdx(defaultDate, date);
             int col = getWeekDayIdx(defaultDate, date);
+            String dateTxt = convertRegularTxt(intToString(date));
 
-            // TODO : 추가할 때 해당 인덱스가 없다면(한달 6주인 경우) 캘린더 row 늘리기 -> 조회부터 해보고 존재하지않는다면
-            calendarForm[row][col] = fillRegularTxt(intToString(date));
+            doFill(calendar, row, col, dateTxt);
         }
     }
 
@@ -60,7 +49,7 @@ public class CalendarFactory {
         return targetDate - STANDARD_DATE;
     }
 
-    private static String fillRegularTxt(String date){
+    private static String convertRegularTxt(String date){
         char[] fillArea = getArea();
         int fillIdx = fillArea.length-1;
         int targetIdx = date.length()-1;
@@ -81,9 +70,27 @@ public class CalendarFactory {
         return String.valueOf(date);
     }
 
+    private static void doFill(String[][] calendar, int row, int col, String date){
+        try{
+            calendar[row][col] = date;
+        }catch(ArrayIndexOutOfBoundsException e){
+            setCalendar(extendCalendarForm(calendar, row, col, date));
+        }
+    }
+
+    private static String[][] extendCalendarForm(String[][] beforeCalendar, int row, int col, String date){
+        String[][] extendCalendar = new String[6][7];
+        for(int i=0; i<beforeCalendar.length; i++){
+            extendCalendar[i] = beforeCalendar[i];
+        }
+        extendCalendar[row][col] = date;
+        return extendCalendar;
+    }
 
 
-    private static void fillEmpty(String[][] calendar){
+    private static void fillEmpty(){
+        String[][] calendar = getCalendar();
+
         for(String[] week : calendar) {
             fillEmptryWeek(week);
         }
@@ -103,6 +110,19 @@ public class CalendarFactory {
 
     private static boolean isNullDate(String date){
         return date == null;
+    }
+
+
+    private static String buildCalendarMessage(String[][] calendar){
+        StringBuilder builder = new StringBuilder();
+
+        builder.append(Format.TOP.getFormat())
+                .append(Format.LINE.getFormat());
+
+        for(String[] week : calendar){
+            builder.append(String.format(Format.DATE.getFormat(), week));
+        }
+        return builder.toString();
     }
 }
 
