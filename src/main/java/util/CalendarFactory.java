@@ -4,10 +4,6 @@ import java.util.Arrays;
 
 public class CalendarFactory {
     private static String[][] calendar;
-    private static final int STANDARD_YEAR = 1900;
-    private static final int STANDARD_MONTH = 1;
-    private static final int STANDARD_DATE = 1;
-    private static final int STANDARD_WEEKDAY_IDX = WeekDay.월.getWeekDayIdx();
 
     public static String createCalendar(int year, int month){
         setCalendar(getCalendarForm());
@@ -16,7 +12,7 @@ public class CalendarFactory {
         fillDate(maxDate, startWeekDayIdx);
         fillEmpty();
 
-        return buildCalendarMessage(getCalendar());
+        return buildCalendarMessage(year, month, getCalendar());
     }
 
     private static void setCalendar(String[][] calendarForm){
@@ -34,23 +30,25 @@ public class CalendarFactory {
 
     private static int getStartWeekDayIdx(int year, int month){
         int totalDiffDate = getTotalDiffDate(year, month);
-        return (totalDiffDate + STANDARD_WEEKDAY_IDX)%7;
+        return (totalDiffDate + getStandardValue(Standard.WEEKDAY))%7;
     }
 
     private static int getTotalDiffDate(int year, int month){
-        return A(year) + B(year, month);
+        return getTotalYearDate(year) + getTotalMonthdate(year, month);
     }
 
-    private static int A(int year){
+    private static int getTotalYearDate(int year){
         int sum = 0;
+        int STANDARD_YEAR = getStandardValue(Standard.YEAR);
         for(int i=STANDARD_YEAR; i<year; i++){
             sum += CalendarInfo.getYearDate(i);
         }
         return sum;
     }
 
-    private static int B(int year, int month){
+    private static int getTotalMonthdate(int year, int month){
         int sum = 0;
+        int STANDARD_MONTH = getStandardValue(Standard.MONTH);
         for(int i=STANDARD_MONTH; i<month; i++){
             sum += CalendarInfo.getMonthDate(year, i);
         }
@@ -77,7 +75,7 @@ public class CalendarFactory {
     }
 
     private static int getDiffDate(int targetDate){
-        return targetDate - STANDARD_DATE;
+        return targetDate - getStandardValue(Standard.DATE);
     }
 
     private static String convertRegularTxt(String date){
@@ -144,22 +142,29 @@ public class CalendarFactory {
     }
 
 
-    private static String buildCalendarMessage(String[][] calendar){
+    private static String buildCalendarMessage(int year, int month, String[][] calendar){
         StringBuilder builder = new StringBuilder();
 
-        builder.append(Format.TOP.getFormat())
-                .append(Format.LINE.getFormat());
+        builder.append(String.format(Format.TITLE.getFormat(), year, month))
+               .append(Format.MONTH.getFormat())
+               .append(Format.LINE.getFormat());
 
         for(String[] week : calendar){
             builder.append(String.format(Format.DATE.getFormat(), week));
         }
         return builder.toString();
     }
+
+
+    private static int getStandardValue(Standard standard){
+        return standard.getValue();
+    }
 }
 
 
 enum Format{
-    TOP("SU MO TU WE TH FR SA\n"),
+    TITLE("     %d년 %d월\n"),
+    MONTH("SU MO TU WE TH FR SA\n"),
     LINE("--------------------\n"),
     DATE("%s %s %s %s %s %s %s\n");
 
@@ -173,4 +178,36 @@ enum Format{
         return format;
     }
 }
+
+enum Standard{
+    YEAR(1900),
+    MONTH(1),
+    DATE(1),
+    WEEKDAY(WeekDay.월.getWeekDayIdx());
+
+    private int value;
+
+    Standard(int value) {
+        this.value = value;
+    }
+
+    public int getValue() {
+        return value;
+    }
+}
+
+enum WeekDay {
+    일(0), 월(1), 화(2), 수(3), 목(4), 금(5), 토(6);
+
+    private int weekDayIdx;
+
+    WeekDay(int weekDayIdx){
+        this.weekDayIdx = weekDayIdx;
+    }
+
+    public int getWeekDayIdx(){
+        return weekDayIdx;
+    }
+}
+
 

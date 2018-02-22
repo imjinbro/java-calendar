@@ -14,11 +14,10 @@ public class CalendarInfo {
     }
 
     private static int[] getMaxDateList(int year){
-        int[] maxDateList;
         if(isLeapYear(year)){
-            maxDateList = YearMode.LEAP_YEAR.getMaxDateList();
+            return YearMode.LEAP_YEAR.getMaxDateList();
         }
-        return maxDateList = YearMode.NORMAL_YEAR.getMaxDateList();
+        return YearMode.NORMAL_YEAR.getMaxDateList();
     }
 
     private static int getMonthIdx(int month){
