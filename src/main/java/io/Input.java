@@ -3,14 +3,21 @@ package io;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Scanner;
 
 public class Input {
     private static BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-    private static Scanner scanner = new Scanner(System.in);
+
+    public static int getYear(){
+        Output.printMessage("년도를 입력하세요.");
+        return getInt();
+    }
 
     public static int getMonth(){
         Output.printMessage("달을 입력해주세요.");
+        return getInt();
+    }
+
+    private static int getInt(){
         try {
             return strToInt(reader.readLine());
         } catch (IOException | NumberFormatException e) {
@@ -20,15 +27,6 @@ public class Input {
 
     private static int strToInt(String input) throws NumberFormatException{
         return Integer.parseInt(input);
-    }
-
-    public static String getWeekDay(){
-        Output.printMessage("1일은 무슨 요일인가요?");
-        try {
-            return reader.readLine();
-        } catch (IOException e) {
-            return "";
-        }
     }
 
     public static void close(){

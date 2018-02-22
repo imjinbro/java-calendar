@@ -4,12 +4,18 @@ import java.util.Arrays;
 
 public class CalendarFactory {
     private static String[][] calendar;
+    private static final int STANDARD_YEAR = 1900;
+    private static final int STANDARD_MONTH = 1;
     private static final int STANDARD_DATE = 1;
+    private static final int STANDARD_WEEKDAY_IDX = WeekDay.월.getWeekDayIdx();
 
-    public static String createCalendar(int maxDate, int defaultDate){
+    public static String createCalendar(int year, int month){
         setCalendar(getCalendarForm());
-        fillDate(maxDate, defaultDate);
+        int startWeekDayIdx = getStartWeekDayIdx(year, month);
+        int maxDate = CalendarInfo.getMonthDate(year, month);
+        fillDate(maxDate, startWeekDayIdx);
         fillEmpty();
+
         return buildCalendarMessage(getCalendar());
     }
 
@@ -26,23 +32,48 @@ public class CalendarFactory {
     }
 
 
-    private static void fillDate(int maxDate, int defaultDate){
+    private static int getStartWeekDayIdx(int year, int month){
+        int totalDiffDate = getTotalDiffDate(year, month);
+        return (totalDiffDate + STANDARD_WEEKDAY_IDX)%7;
+    }
+
+    private static int getTotalDiffDate(int year, int month){
+        return A(year) + B(year, month);
+    }
+
+    private static int A(int year){
+        int sum = 0;
+        for(int i=STANDARD_YEAR; i<year; i++){
+            sum += CalendarInfo.getYearDate(i);
+        }
+        return sum;
+    }
+
+    private static int B(int year, int month){
+        int sum = 0;
+        for(int i=STANDARD_MONTH; i<month; i++){
+            sum += CalendarInfo.getMonthDate(year, i);
+        }
+        return sum;
+    }
+
+    private static void fillDate(int maxDate, int startWeekDayIdx){
         for(int date=1; date<=maxDate; date++){
             String[][] calendar = getCalendar();
-            int row = getWeekIdx(defaultDate, date);
-            int col = getWeekDayIdx(defaultDate, date);
+            int row = getWeekIdx(startWeekDayIdx, date);
+            int col = getWeekDayIdx(startWeekDayIdx, date);
             String dateTxt = convertRegularTxt(intToString(date));
 
             doFill(calendar, row, col, dateTxt);
         }
     }
 
-    private static int getWeekIdx(int defaultDate, int targetDate){
-        return (defaultDate + getDiffDate(targetDate))/7;
+    private static int getWeekIdx(int startWeekDayIdx, int targetDate){
+        return (startWeekDayIdx + getDiffDate(targetDate))/7;
     }
 
-    private static int getWeekDayIdx(int defaultDate, int targetDate){
-        return (defaultDate + getDiffDate(targetDate))%7;
+    private static int getWeekDayIdx(int startWeekDayIdx, int targetDate){
+        return (startWeekDayIdx + getDiffDate(targetDate))%7;
     }
 
     private static int getDiffDate(int targetDate){

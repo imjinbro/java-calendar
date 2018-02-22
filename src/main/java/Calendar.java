@@ -1,7 +1,6 @@
 import io.Input;
 import io.Output;
 import util.CalendarFactory;
-import util.MaxDate;
 
 public class Calendar {
     public static void main(String[] args) {
@@ -10,12 +9,12 @@ public class Calendar {
 
     /* interface */
     public static void start(){
-        int month = getMonth();
+        int year = getYear();
 
-        while(!isFinishInput(month)){
-            String weekDay = getWeekDay();
-            printCalendar(month, weekDay);
-            month = getMonth();
+        while(!isFinishInput(year)){
+            int month = getMonth();
+            printCalendar(year, month);
+            year = getYear();
         }
         printMessage("Have a nice day!");
     }
@@ -23,49 +22,32 @@ public class Calendar {
 
 
     /* func */
-    private static void printMaxDateInfo(int month){
+    private static void printCalendar(int year, int month){
+        if(isInvalidYear(year)){
+            printMessage("지원하지 않는 년(1900~)도 입니다.");
+            return;
+        }
+
         if(isInvalidMonth(month)){
-            printMessage("존재하지않는 달(월) 입니다.");
+            printMessage("올바르지 않는 월(달)입니다.");
             return;
         }
-        String infoMessage = MaxDate.getMaxDateInfo(month);
-        Output.printMessage(infoMessage);
-    }
-
-    private static void printCalendar(int month, String weekDay){
-        if(isInvalidMonth(month) || isInvalidWeekDay(weekDay)){
-            printMessage("존재하지않는 달(월) 또는 요일 입니다.");
-            return;
-        }
-
-        int maxDate = MaxDate.getMaxDate(month);
-        int defaultDay = WeekDay.valueOf(weekDay).getDefaultDate();
-        String calendar = CalendarFactory.createCalendar(maxDate, defaultDay);
-        printMessage(calendar);
+        printMessage(CalendarFactory.createCalendar(year, month));
     }
     /* end func */
 
 
     /* util */
+    private static int getYear(){
+        return Input.getYear();
+    }
+
     private static int getMonth(){
         return Input.getMonth();
     }
 
-    private static String getWeekDay(){
-        return Input.getWeekDay();
-    }
-
-    private static void printMessage(String message){
-        Output.printMessage(message);
-    }
-
-    private static boolean isInvalidWeekDay(String weekDay){
-        try{
-            WeekDay.valueOf(weekDay);
-            return false;
-        }catch(IllegalArgumentException e){
-            return true;
-        }
+    private static boolean isInvalidYear(int year){
+        return year < 1900;
     }
 
     private static boolean isInvalidMonth(int month){
@@ -75,20 +57,9 @@ public class Calendar {
     private static boolean isFinishInput(int input){
         return input == -1;
     }
+
+    private static void printMessage(String message){
+        Output.printMessage(message);
+    }
     /* end util */
-}
-
-
-enum WeekDay{
-    일(0), 월(1), 화(2), 수(3), 목(4), 금(5), 토(6);
-
-    private int defaultDate;
-
-    WeekDay(int defaultDate){
-        this.defaultDate = defaultDate;
-    }
-
-    public int getDefaultDate(){
-        return defaultDate;
-    }
 }
